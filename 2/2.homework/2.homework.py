@@ -66,9 +66,50 @@ class Queue:
 # Add test code to test() that achieves 100% coverage of the 
 # Queue class.
 def test():
-    q = Queue(4)
+    q = Queue(3)
     assert q.empty()
-    
+    q.checkRep()
+
+    res = q.dequeue()
+    assert res == None
+    assert q.empty()
+    q.checkRep()
+
+    res = q.enqueue(1)
+    assert res == True
+    assert not q.empty()
+    assert not q.full()
+    q.checkRep()
+
+    q.enqueue(2)
+    assert not q.empty()
+    assert not q.full()
+    q.checkRep()
+
+    res = q.enqueue(3)
+    assert res == True
+    assert q.full()
+    q.checkRep()
+
+    res = q.enqueue(99)
+    assert res == False
+    q.checkRep()
+
+    res = q.dequeue()
+    assert res == 1
+    assert not q.full()
+    assert not q.empty()
+    q.checkRep()
+
+    res = q.dequeue()
+    assert res == 2
+    q.checkRep()
+
+    res = q.dequeue()
+    assert res == 3
+    assert q.empty()
+    q.checkRep()
+
 
 test()
 
