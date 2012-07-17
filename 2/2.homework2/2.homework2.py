@@ -141,8 +141,60 @@ class SplayTree:
 # Write test code in this function to achieve 
 # full statement coverage on the SplayTree class.
 def test():
-    ###Your code here.
+    s = SplayTree()
+    s.remove(12345)
+    assert s.isEmpty()
+    assert s.findMax() == None
+    assert s.findMin() == None
+    assert s.find(12345) == None
+    
+    s.insert(1)
+    s.insert(70)
+    s.insert(50)
+    s.insert(50)
+    s.insert(999)
+    s.insert(3)
+    assert not s.isEmpty()
+    assert s.findMin() == 1
+    assert s.findMax() == 999
+    assert s.find(999) == 999
+    assert s.find(1234) == None
+
+    s.remove(999)
+    assert s.find(999) == None
+
+    s.remove(12345)
+
+    s = SplayTree()
+    s.insert(5)
+    s.insert(4)
+    s.remove(4)
+
+    s = SplayTree()
+    s.insert(5)
+    s.insert(3)
+    s.insert(2)
+    s.remove(2)
+
+    # for some reason this finally triggers line 115
+    s = SplayTree()
+    s.insert(513)
+    s.remove(587)
+    s.insert(888)
+    s.remove(332)
+
     pass
+
+def linefinder():
+    import random
+    s = SplayTree()
+    for i in range(0, 100):
+        a = random.randint(1, 1000)
+        b = random.randint(1, 1000)
+        print 's.insert('+str(a)+')'
+        s.insert(a)
+        print 's.remove('+str(b)+')'
+        s.remove(b)
 
 test()
 
