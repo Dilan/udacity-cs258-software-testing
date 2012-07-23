@@ -22,6 +22,7 @@
 def is_luhn_valid(n):
     ###Your code here.
     
+    n = str(n)
     digits = [int(x) for x in list(n)]
 
     double_offset = 0 if len(digits)%2==0 else 1
