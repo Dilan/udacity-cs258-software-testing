@@ -102,7 +102,68 @@ hard = [[1,0,0,0,0,7,0,9,0],
 
 def check_sudoku(grid):
     ###Your code here.
-    pass
+    # there are 9 rows
+    if len(grid) != 9:
+      return None
+
+    # each row has 9 elements
+    for row in grid:
+      if len(row) != 9:
+        return None
+
+    # sanity check - make sure each element in grid is digit between 0 and 9
+    for row in grid:
+      for cell in row:
+        if cell not in range(0, 9+1):
+          return None
+
+    # test validity of each row
+    for row in grid:
+      if not group_is_valid(row):
+        return False
+
+    # test validity of each column
+    for col_number in range(0, 9):
+      column = [row[col_number] for row in grid]
+      if not group_is_valid(column):
+        return False
+
+    # test validity of each sub-grid
+    for sub_grid_row_offset in [0, 3, 6]:
+      for sub_grid_col_offset in [0, 3, 6]:
+        sub_grid = []
+        for row_number in [row + sub_grid_row_offset for row in [0, 1, 2]]:
+          for col_number in [col + sub_grid_col_offset for col in [0, 1, 2]]:
+            sub_grid.append(grid[row_number][col_number])
+        if not group_is_valid(sub_grid):
+          return False
+
+    return True
+
+def print_grid(grid):
+    for row in grid:
+      print ' '.join([str(cell) for cell in row])
+    print "\n"
+
+
+def group_is_valid(group):
+    # group should have 9 elements - otherwise getting this far indicates error in test code
+    if len(group) != 9:
+      return False
+
+    # don't care about zeros
+    non_zeros = filter(lambda i: i != 0, group)
+
+    # each element should be unique
+    if len(non_zeros) != len(set(non_zeros)):
+      return False
+
+    # each element should be a digit between 1 and 9 inclusive
+    for i in non_zeros:
+      if i not in (range(1, 9+1)):
+        return False
+
+    return True
 
 print check_sudoku(ill_formed) # --> None
 print check_sudoku(valid)      # --> True
