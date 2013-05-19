@@ -1,3 +1,9 @@
+import random
+import copy
+import sys
+
+depth = 0
+
 # SPECIFICATION:
 #
 # check_sudoku() determines whether its argument is a valid Sudoku
@@ -67,6 +73,17 @@ valid = [[5,3,4,6,7,8,9,1,2],
          [2,8,7,4,1,9,6,3,5],
          [3,4,5,2,8,6,1,7,9]]
 
+valid_unsolved =[
+         [5,3,4,6,7,8,9,1,2],
+         [6,7,2,1,9,0,3,4,8],
+         [1,9,8,0,4,2,5,6,7],
+         [0,0,0,0,0,0,4,2,0],
+         [4,2,6,0,5,0,7,9,1],
+         [7,1,0,9,2,0,0,0,6],
+         [9,0,0,0,3,7,2,0,4],
+         [2,8,7,4,1,9,6,3,5],
+         [3,4,5,2,8,6,1,7,9]]
+
 # check_sudoku should return False
 invalid = [[5,3,4,6,7,8,9,1,2],
            [6,7,2,1,9,5,3,4,8],
@@ -99,6 +116,19 @@ hard = [[1,0,0,0,0,7,0,9,0],
         [3,0,0,0,0,0,0,1,0],
         [0,4,0,0,0,0,0,0,7],
         [0,0,7,0,0,0,3,0,0]]
+
+# from 
+ultra_hard =[
+  [8,0,0,0,0,0,0,0,0],
+  [0,0,3,6,0,0,0,0,0],
+  [0,7,0,0,9,0,2,0,0],
+  [0,5,0,0,0,7,0,0,0],
+  [0,0,0,0,4,5,7,0,0],
+  [0,0,0,1,0,0,0,3,0],
+  [0,0,1,0,0,0,0,6,8],
+  [0,0,8,5,0,0,0,1,0],
+  [0,9,0,0,0,0,4,0,0]]
+
 
 def check_sudoku(grid):
     ###Your code here.
@@ -165,9 +195,56 @@ def group_is_valid(group):
 
     return True
 
-print check_sudoku(ill_formed) # --> None
-print check_sudoku(valid)      # --> True
-print check_sudoku(invalid)    # --> False
-print check_sudoku(easy)       # --> True
-print check_sudoku(hard)       # --> True
 
+def solve_sudoku(original_grid, blank_cell_coordinates = []):
+
+  global depth
+  print blank_cell_coordinates
+  print depth*'-'
+
+  check_result = check_sudoku(original_grid)
+
+  if check_result is None:
+    print "Invalid grid"
+    exit()
+
+  if check_result == False:
+    return
+
+  if len(blank_cell_coordinates) == 0:
+    # might be the first run, or it might be solved
+    blank_cell_coordinates = find_coordinates_of_blank_cells(original_grid)
+    if len(blank_cell_coordinates) == 0:
+      print 'Solved'
+      print_grid(original_grid)
+      exit()
+
+  # iterate through all the next moves, recursing deeper if the move is valid
+  for target_cell_coordinates_index, target_cell_coordinates in enumerate(blank_cell_coordinates):
+    for i in range(1, 9+1):
+      modified_grid = copy.deepcopy(original_grid)
+      print i, 'at', target_cell_coordinates
+      modified_grid[target_cell_coordinates[0]][target_cell_coordinates[1]] = i
+
+      if check_sudoku(modified_grid):
+        blank_cell_coordinates_copy = copy.deepcopy(blank_cell_coordinates)
+        del(blank_cell_coordinates_copy[target_cell_coordinates_index])
+        depth = depth + 1
+        solve_sudoku(modified_grid, blank_cell_coordinates_copy)
+        depth = depth - 1
+
+  return
+
+
+def find_coordinates_of_blank_cells(grid):
+  print 'Finding coordinates of blank cells'
+  blank_cell_coordinates = []
+  for row_number, row in enumerate(grid):
+    for cell_number, cell in enumerate(row):
+      if cell == 0:
+        blank_cell_coordinates.append((row_number, cell_number))
+
+  return blank_cell_coordinates
+
+
+solve_sudoku(valid_unsolved)
