@@ -53,7 +53,9 @@ depth = 0
 # the Sudoku grid that the player has not yet filled in.
 
 # check_sudoku should return None
-ill_formed = [[5,3,4,6,7,8,9,1,2],
+puzzles = {}
+
+puzzles['ill_formed'] = [[5,3,4,6,7,8,9,1,2],
               [6,7,2,1,9,5,3,4,8],
               [1,9,8,3,4,2,5,6,7],
               [8,5,9,7,6,1,4,2,3],
@@ -64,7 +66,7 @@ ill_formed = [[5,3,4,6,7,8,9,1,2],
               [3,4,5,2,8,6,1,7,9]]
 
 # check_sudoku should return True
-valid = [[5,3,4,6,7,8,9,1,2],
+puzzles['valid'] = [[5,3,4,6,7,8,9,1,2],
          [6,7,2,1,9,5,3,4,8],
          [1,9,8,3,4,2,5,6,7],
          [8,5,9,7,6,1,4,2,3],
@@ -74,7 +76,7 @@ valid = [[5,3,4,6,7,8,9,1,2],
          [2,8,7,4,1,9,6,3,5],
          [3,4,5,2,8,6,1,7,9]]
 
-valid_unsolved =[
+puzzles['valid_unsolved'] =[
          [5,3,4,6,7,8,9,1,2],
          [6,7,2,1,9,0,3,4,8],
          [1,9,8,0,4,2,5,6,7],
@@ -86,7 +88,7 @@ valid_unsolved =[
          [3,4,5,2,8,6,1,7,9]]
 
 # check_sudoku should return False
-invalid = [[5,3,4,6,7,8,9,1,2],
+puzzles['invalid'] = [[5,3,4,6,7,8,9,1,2],
            [6,7,2,1,9,5,3,4,8],
            [1,9,8,3,8,2,5,6,7],
            [8,5,9,7,6,1,4,2,3],
@@ -95,8 +97,6 @@ invalid = [[5,3,4,6,7,8,9,1,2],
            [9,6,1,5,3,7,2,8,4],
            [2,8,7,4,1,9,6,3,5],
            [3,4,5,2,8,6,1,7,9]]
-
-puzzles = {}
 
 # check_sudoku should return True
 puzzles['easy'] = [[2,9,0,0,0,0,0,7,0],
@@ -208,14 +208,14 @@ def group_is_valid(group):
       return False
 
     # don't care about zeros
-    if 0 in group: group.remove(0)
+    non_zeros = filter(lambda i: i != 0, group)
 
     # each element should be unique
-    if len(group) != len(set(group)):
+    if len(non_zeros) != len(set(non_zeros)):
       return False
 
     # each element should be a digit between 1 and 9 inclusive
-    for i in group:
+    for i in non_zeros:
       if i not in (range(1, 9+1)):
         return False
 
@@ -227,13 +227,22 @@ def solve_sudoku(grid, blank_cell_coordinates = []):
   global depth
 
   if len(blank_cell_coordinates) == 0:
+
+    # might be the first run - check validity
+    check_result = check_sudoku(grid)
+    if not check_result:
+      return check_result
+
     # might be the first run, or it might be solved
     blank_cell_coordinates = find_coordinates_of_blank_cells(grid)
+
     if len(blank_cell_coordinates) == 0:
       print 'Solved'
       print 'depth', depth
       print_grid(grid)
       return grid
+
+
 
   # iterate through all the next moves, recursing deeper if the move is valid
   target_cell_coordinates = blank_cell_coordinates.pop()
@@ -331,6 +340,10 @@ def test():
 
   assert find_allowed_numbers(grid, (0, 8)) == set([1, 3, 4, 5, 6, 7, 9])
   assert find_allowed_numbers(grid, (4, 4)) == set([2, 3, 6, 8])
+  assert check_sudoku(puzzles['ill_formed']) is None
+  assert check_sudoku(puzzles['invalid']) is False
+  assert solve_sudoku(puzzles['ill_formed']) is None
+  assert solve_sudoku(puzzles['invalid']) is False
 
 
 if __name__ == "__main__":
