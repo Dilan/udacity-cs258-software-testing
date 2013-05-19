@@ -1,6 +1,7 @@
 import random
 import copy
 import time
+import math
 
 depth = 0
 
@@ -220,14 +221,13 @@ def solve_sudoku(grid, blank_cell_coordinates = []):
 
   # iterate through all the next moves, recursing deeper if the move is valid
   target_cell_coordinates = blank_cell_coordinates.pop()
-  for i in range(1, 9+1):
+  for i in find_allowed_numbers(grid, target_cell_coordinates):
     grid[target_cell_coordinates[0]][target_cell_coordinates[1]] = i
 
-    if check_sudoku(grid):
-      depth = depth + 1
-      if solve_sudoku(grid, blank_cell_coordinates):
-        return True
-      depth = depth - 1
+    depth = depth + 1
+    if solve_sudoku(grid, blank_cell_coordinates):
+      return True
+    depth = depth - 1
 
     grid[target_cell_coordinates[0]][target_cell_coordinates[1]] = 0
 
@@ -245,7 +245,77 @@ def find_coordinates_of_blank_cells(grid):
 
   return blank_cell_coordinates
 
+
+def find_allowed_numbers(grid, coord):
+  row_number = coord[0]
+  col_number = coord[1]
+  allowed_moves = set(range(1, 9+1))
+  
+  allowed_moves = allowed_moves - set(grid[row_number])
+  for i in range(0, 9):
+    allowed_moves.discard(grid[i][col_number])
+
+  allowed_moves = allowed_moves - set(find_subgrid_of_coord(grid, coord))
+  return allowed_moves
+
+
+def find_subgrid_of_coord(grid, coord):
+  sub_grid_row_offset = find_subgrid_offset_for_coord(coord[0])
+  sub_grid_col_offset = find_subgrid_offset_for_coord(coord[1])
+  sub_grid = []
+  for row_number in [row + sub_grid_row_offset for row in [0, 1, 2]]:
+    for col_number in [col + sub_grid_col_offset for col in [0, 1, 2]]:
+      sub_grid.append(grid[row_number][col_number])
+  return sub_grid
+
+
+def find_subgrid_offset_for_coord(coord):
+  return int(math.floor(coord*1.0/3))*3
+
+
+def test():
+  grid = [
+         [5,3,4,6,7,8,9,1,2],
+         [6,7,2,1,9,5,3,4,8],
+         [1,9,8,3,4,2,5,6,7],
+         [8,5,9,7,6,1,4,2,3],
+         [4,2,6,8,5,3,7,9,1],
+         [7,1,3,9,2,4,8,5,6],
+         [0,0,1,5,3,7,2,8,4],
+         [2,8,7,4,1,9,6,3,5],
+         [3,4,5,2,8,6,1,7,9]]
+  assert set(find_subgrid_of_coord(grid, (0, 0))) == set([5, 3, 4, 6, 7, 2, 1, 9, 8])
+  assert set(find_subgrid_of_coord(grid, (6, 7))) == set([2, 8, 4, 6, 3, 5, 1, 7, 9])
+  assert set(find_subgrid_of_coord(grid, (4, 7))) == set([4, 2, 3, 7, 9, 1, 8, 5, 6])
+
+  assert find_subgrid_offset_for_coord(0) == 0
+  assert find_subgrid_offset_for_coord(1) == 0
+  assert find_subgrid_offset_for_coord(2) == 0
+  assert find_subgrid_offset_for_coord(3) == 3
+  assert find_subgrid_offset_for_coord(4) == 3
+  assert find_subgrid_offset_for_coord(5) == 3
+  assert find_subgrid_offset_for_coord(6) == 6
+  assert find_subgrid_offset_for_coord(7) == 6
+  assert find_subgrid_offset_for_coord(8) == 6
+
+  grid = [
+    [8,0,0,0,0,0,0,0,0],
+    [0,0,3,6,0,0,0,0,0],
+    [0,7,0,0,9,0,2,0,0],
+    [0,5,0,0,0,7,0,0,0],
+    [0,0,0,0,4,5,7,0,0],
+    [0,0,0,1,0,0,0,3,0],
+    [0,0,1,0,0,0,0,6,8],
+    [0,0,8,5,0,0,0,1,0],
+    [0,9,0,0,0,0,4,0,0]]
+
+  assert find_allowed_numbers(grid, (0, 8)) == set([1, 3, 4, 5, 6, 7, 9])
+  assert find_allowed_numbers(grid, (4, 4)) == set([2, 3, 6, 8])
+
+
 t1 = time.time()
-solve_sudoku(hard)
+solve_sudoku(easy)
 t2 = time.time()
 print t2 - t1, 'seconds'
+
+
