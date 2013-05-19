@@ -96,8 +96,10 @@ invalid = [[5,3,4,6,7,8,9,1,2],
            [2,8,7,4,1,9,6,3,5],
            [3,4,5,2,8,6,1,7,9]]
 
+puzzles = {}
+
 # check_sudoku should return True
-easy = [[2,9,0,0,0,0,0,7,0],
+puzzles['easy'] = [[2,9,0,0,0,0,0,7,0],
         [3,0,6,0,0,8,4,0,0],
         [8,0,0,0,4,0,0,0,2],
         [0,2,0,0,3,1,0,0,7],
@@ -108,7 +110,7 @@ easy = [[2,9,0,0,0,0,0,7,0],
         [0,3,0,0,0,0,0,5,9]]
 
 # check_sudoku should return True
-hard = [[1,0,0,0,0,7,0,9,0],
+puzzles['hard'] = [[1,0,0,0,0,7,0,9,0],
         [0,3,0,0,2,0,0,0,8],
         [0,0,9,6,0,0,5,0,0],
         [0,0,5,3,0,0,9,0,0],
@@ -118,8 +120,8 @@ hard = [[1,0,0,0,0,7,0,9,0],
         [0,4,0,0,0,0,0,0,7],
         [0,0,7,0,0,0,3,0,0]]
 
-# from 
-ultra_hard =[
+# from http://www.telegraph.co.uk/science/science-news/9359579/Worlds-hardest-sudoku-can-you-crack-it.html
+puzzles['ultra_hard'] =[
   [8,0,0,0,0,0,0,0,0],
   [0,0,3,6,0,0,0,0,0],
   [0,7,0,0,9,0,2,0,0],
@@ -130,6 +132,29 @@ ultra_hard =[
   [0,0,8,5,0,0,0,1,0],
   [0,9,0,0,0,0,4,0,0]]
 
+# from http://usatoday30.usatoday.com/news/offbeat/2006-11-06-sudoku_x.htm
+puzzles['usa_today'] =[
+  [8,5,0,0,0,2,4,0,0],
+  [7,2,0,0,0,0,0,0,9],
+  [0,0,4,0,0,0,0,0,0],
+  [0,0,0,1,0,7,0,0,2],
+  [3,0,5,0,0,0,9,0,0],
+  [0,4,0,0,0,0,0,0,0],
+  [0,0,0,0,8,0,0,7,0],
+  [0,1,7,0,0,0,0,0,0],
+  [0,0,0,0,3,6,0,4,0]]
+
+# http://www.sudoku.ws/extreme-1.htm
+puzzles['extreme'] = [
+  [0,0,9,7,4,8,0,0,0],
+  [7,0,0,0,0,0,0,0,0],
+  [0,2,0,1,0,9,0,0,0],
+  [0,0,7,0,0,0,2,4,0],
+  [0,6,4,0,1,0,5,9,0],
+  [0,9,8,0,0,0,3,0,0],
+  [0,0,0,8,0,3,0,2,0],
+  [0,0,0,0,0,0,0,0,6],
+  [0,0,0,2,7,5,9,0,0]]
 
 def check_sudoku(grid):
     ###Your code here.
@@ -183,14 +208,14 @@ def group_is_valid(group):
       return False
 
     # don't care about zeros
-    non_zeros = filter(lambda i: i != 0, group)
+    if 0 in group: group.remove(0)
 
     # each element should be unique
-    if len(non_zeros) != len(set(non_zeros)):
+    if len(group) != len(set(group)):
       return False
 
     # each element should be a digit between 1 and 9 inclusive
-    for i in non_zeros:
+    for i in group:
       if i not in (range(1, 9+1)):
         return False
 
@@ -201,15 +226,6 @@ def solve_sudoku(grid, blank_cell_coordinates = []):
 
   global depth
 
-  check_result = check_sudoku(grid)
-
-  if check_result is None:
-    print "Invalid grid"
-    exit()
-
-  if check_result == False:
-    return
-
   if len(blank_cell_coordinates) == 0:
     # might be the first run, or it might be solved
     blank_cell_coordinates = find_coordinates_of_blank_cells(grid)
@@ -217,7 +233,7 @@ def solve_sudoku(grid, blank_cell_coordinates = []):
       print 'Solved'
       print 'depth', depth
       print_grid(grid)
-      return True
+      return grid
 
   # iterate through all the next moves, recursing deeper if the move is valid
   target_cell_coordinates = blank_cell_coordinates.pop()
@@ -226,7 +242,7 @@ def solve_sudoku(grid, blank_cell_coordinates = []):
 
     depth = depth + 1
     if solve_sudoku(grid, blank_cell_coordinates):
-      return True
+      return grid
     depth = depth - 1
 
     grid[target_cell_coordinates[0]][target_cell_coordinates[1]] = 0
@@ -255,7 +271,11 @@ def find_allowed_numbers(grid, coord):
   for i in range(0, 9):
     allowed_moves.discard(grid[i][col_number])
 
-  allowed_moves = allowed_moves - set(find_subgrid_of_coord(grid, coord))
+  sub_grid_row_offset = find_subgrid_offset_for_coord(coord[0])
+  sub_grid_col_offset = find_subgrid_offset_for_coord(coord[1])
+  for row_number in [row + sub_grid_row_offset for row in [0, 1, 2]]:
+    for col_number in [col + sub_grid_col_offset for col in [0, 1, 2]]:
+      allowed_moves.discard(grid[row_number][col_number])
   return allowed_moves
 
 
@@ -313,9 +333,11 @@ def test():
   assert find_allowed_numbers(grid, (4, 4)) == set([2, 3, 6, 8])
 
 
-t1 = time.time()
-solve_sudoku(easy)
-t2 = time.time()
-print t2 - t1, 'seconds'
-
-
+if __name__ == "__main__":
+  test()
+  for title, puzzle in puzzles.iteritems():
+    depth = 0
+    t1 = time.time()
+    solve_sudoku(puzzle)
+    t2 = time.time()
+    print t2 - t1, 'seconds'
