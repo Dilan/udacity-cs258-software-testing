@@ -98,4 +98,27 @@ class Queue:
 
 
 def random_test():
+    num_iterations = 10000
+    queue_size = 500
+    q = Queue(queue_size)
+    inputs = []
+
+    for x in range(0, num_iterations):
+        to_add = 1234
+        if random.random() < .5:
+            try:
+                q.enqueue(to_add)
+                q.checkRep()
+                inputs.append((to_add, 0))
+            except:
+                inputs.append((to_add, 1))
+        else:
+            try:
+                q.dequeue()
+                q.checkRep()
+                inputs.append(('dq', 0))
+            except:
+                inputs.append(('dq', 1))
+
+    return inputs
 # Write a random tester for the Queue class
