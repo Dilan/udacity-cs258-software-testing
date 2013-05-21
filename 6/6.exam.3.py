@@ -46,6 +46,8 @@ class Queue:
         return True
 
     def dequeue(self):
+        if self.size <= 0:
+            return None
         x = self.data[self.head]
         self.size -= 1
         self.head += 1
@@ -65,6 +67,10 @@ class Queue:
         if self.head == self.tail:
             assert (self
                     .size==0) or (self.size==self.max)
+
+
+    def to_str(self):
+        print self.data
 
 
 # An example list of enqueue integers and dequeue indicators
@@ -90,6 +96,51 @@ inpts = [(574, 0), ('dq', 0), (991, 0), ('dq', 0), ('dq', 1),
          (966, 0), ('dq', 0), (865, 0), ('dq', 0), (348, 0)]
 
 
-# Write a regression tester for the Queue class
-def regression_test():
+def random_test(return_on_failure = False):
+    num_iterations = 10000
+    queue_size = 500
+    q = Queue(queue_size)
+    inputs = []
 
+    for x in range(0, num_iterations):
+        to_add = 1234
+        if random.random() < .5:
+            try:
+                q.enqueue(to_add)
+                q.checkRep()
+                inputs.append((to_add, 0))
+            except:
+                inputs.append((to_add, 1))
+                if return_on_failure:
+                    return inputs
+        else:
+            try:
+                q.dequeue()
+                q.checkRep()
+                inputs.append(('dq', 0))
+            except:
+                inputs.append(('dq', 1))
+                if return_on_failure:
+                    return inputs
+
+    return True
+
+
+# Write a regression tester for the Queue class
+def regression_test(inpts):
+    q = Queue(500)
+    for instruction in inpts:
+        action, result = instruction
+        if type(action) is int:
+            q.enqueue(action)
+        elif action == 'dq':
+            q.dequeue()
+        q.checkRep()
+    print q.to_str()
+
+
+if __name__ == '__main__':
+    
+    test_result = random_test(return_on_failure=True)
+    if not test_result:
+        print test_result
