@@ -1,28 +1,3 @@
-# Code Coverage
-# ---------------
-# Achieve full statement coverage and parameter value coverage for
-# strings, integers, and booleans on this enhanced Queue class.
-#
-# You will need to:
-# 1) Write your test code in the test function.
-# 2) Press submit. The grader will tell you if you 
-#    fail to cover any specific part of the code.
-# 3) Update your test function until you cover the 
-#    entire code base.
-
-# This specific Queue class can enqueue not only integers,
-# but strings and booleans as well. You will need to provide
-# parameter value coverage for these data types by adding
-# each type of data into your Queue. 
-#
-# Furthermore, this Queue class has the additional methods
-# clear() and enqueueall(). The enqueueall method takes
-# in a list or tuple and enqueues each item of the collection
-# individually, returning True if all enqueues succeed, and
-# False if the number of items in the collection will overfill
-# the Queue.
-
-
 # Enhanced Queue class
 class Queue:
     
@@ -92,3 +67,59 @@ class Queue:
 
 # Provide full statement and parameter value coverage of the Queue class
 def test():
+    # overfill test; parameter coverage
+    q = Queue(4)
+    q.enqueue(1)
+    q.enqueue('')
+    q.enqueue('asdf')
+    q.enqueue(False)
+    q.enqueue(True)
+    q.checkRep()
+
+    # dequeue and dequeue empty
+    q = Queue(10)
+    q.enqueue(1)
+    el = q.dequeue()
+    assert el == 1
+    el = q.dequeue()
+    assert el is None
+
+    # __str__
+    print(q)
+
+    q.clear()
+    q.checkRep()
+
+    q.empty()
+    q.checkRep()
+
+    q.enqueueall((0, 1, 2, 3, 4, 5, 6, 7, 8, 9))
+    assert q.full()
+    q.clear()
+    assert q.empty()
+    q.checkRep()
+
+    assert q.enqueue([1]) is False
+    assert q.enqueueall(1) is False
+    q.checkRep()
+
+    q = Queue(1)
+    q.enqueue(1)
+    q.dequeue()
+    q.checkRep()
+
+    q = Queue(3)
+    q.enqueue(0)
+    q.checkRep()
+    q.enqueue(1)
+    q.enqueue(2)
+    q.dequeue()
+    q.checkRep()
+    q.dequeue()
+    q.dequeue()
+    q.enqueue(2)
+    q.enqueue(3)
+
+
+test()
+
